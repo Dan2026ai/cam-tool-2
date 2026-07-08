@@ -443,7 +443,7 @@
           <th style="width:9%;">Area (sq ft)</th>
           <th style="width:9%;">CAM rate ($/sqft/yr)</th>
           <th style="width:7%;">Admin %</th>
-          <th style="width:12%;">Est. CAM paid ($)</th>
+          <th style="width:12%;">Est. Payable CAM</th>
           <th style="width:8%;">Months occupied</th>
           <th style="width:6%;">+ Days</th>
           <th style="width:9%;">Lease start</th>
@@ -527,8 +527,8 @@
           <th style="text-align:right;">Share</th>
           <th style="text-align:right;">Occupancy</th>
           <th style="text-align:right;">Admin %</th>
-          <th style="text-align:right;">CAM due</th>
-          <th style="text-align:right;">Est. paid</th>
+          <th style="text-align:right;">CAM for Current Period</th>
+          <th style="text-align:right;">Est. Payable CAM</th>
           <th style="text-align:right;">True-up</th>
           <th></th>
         </tr>
@@ -1126,7 +1126,7 @@ document.getElementById('calcBtn').addEventListener('click', () => {
 
 document.getElementById('exportBtn').addEventListener('click', () => {
   if(!lastResults) return;
-  const lines = [['Tenant','Leased area (sq ft)','Pro-rata share (%)','Occupancy (%)','Admin fee %','CAM due ($)','Estimated paid ($)','True-up ($, positive = due from tenant)']];
+  const lines = [['Tenant','Leased area (sq ft)','Pro-rata share (%)','Occupancy (%)','Admin fee %','CAM for Current Period ($)','Estimated paid ($)','True-up ($, positive = due from tenant)']];
   lastResults.rows.forEach(r => {
     lines.push([r.name || 'Tenant '+r.id, r.area, (r.share*100).toFixed(2), (r.occFraction*100).toFixed(1), r.rate, r.camDue.toFixed(2), (r.estPaid||0).toFixed(2), r.trueUp.toFixed(2)]);
   });
