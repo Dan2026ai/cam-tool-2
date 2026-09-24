@@ -240,6 +240,23 @@
   td input:hover{border-color:var(--line);}
   td input:focus{outline:none;border-color:var(--teal);background:var(--panel);}
   .num-cell{font-family:var(--font-mono);text-align:right;}
+  td input.auto-val{color:var(--ink-soft);font-style:italic;}
+  #tenantTable{table-layout:fixed;min-width:1230px;}
+  #tenantTable td{padding:5px 6px;}
+  #tenantTable th{padding:8px 6px;}
+  #tenantTable .th-num{text-align:right;}
+  #tenantTable tr.group-row th{border-bottom:none;padding-bottom:0;}
+  #tenantTable th.grp{text-align:center;font-size:10.5px;letter-spacing:0.05em;color:var(--ink-soft);border-bottom:1px solid var(--line);}
+  #tenantTable th.grp-recon{color:var(--teal);border-bottom:2px solid var(--teal);}
+  #tenantTable td.recon-col, #tenantTable th.recon-col{background:var(--teal-light);}
+  td input[type=date]{
+    width:100%;border:1px solid transparent;background:transparent;font-family:var(--font-mono);
+    font-size:12px;padding:5px 2px;border-radius:4px;color:var(--ink);
+  }
+  td input[type=date]:hover{border-color:var(--line);}
+  td input[type=date]:focus{outline:none;border-color:var(--teal);background:var(--panel);}
+  .roster-legend{font-size:12px;color:var(--ink-soft);margin-top:10px;}
+  .roster-legend i{color:var(--ink-soft);}
 
   .toggle{
     width:16px;height:16px;
@@ -359,15 +376,20 @@
   <div class="step-item" data-step="2">
     <div class="step-line"></div>
     <div class="step-circle">2</div>
-    <div class="step-label">Tenant Roster</div>
+    <div class="step-label">Period</div>
   </div>
   <div class="step-item" data-step="3">
     <div class="step-line"></div>
     <div class="step-circle">3</div>
-    <div class="step-label">Invoice Details</div>
+    <div class="step-label">Tenant Roster</div>
   </div>
   <div class="step-item" data-step="4">
+    <div class="step-line"></div>
     <div class="step-circle">4</div>
+    <div class="step-label">Invoice Details</div>
+  </div>
+  <div class="step-item" data-step="5">
+    <div class="step-circle">5</div>
     <div class="step-label">Calculate</div>
   </div>
 </div>
@@ -405,25 +427,39 @@
 <div class="step-nav">
   <div class="step-nav-hint" id="step1Hint">Upload a report or add expense lines manually to continue.</div>
   <div class="spacer"></div>
-  <button class="primary" onclick="goToStep(2)">Next: Tenant roster →</button>
+  <button class="primary" onclick="goToStep(2)">Next: Admin fee rule →</button>
 </div>
 </div>
 
 <div class="wizard-step" data-step="2">
 <section>
-  <div class="sec-head"><span class="sec-num">2</span><h2>Tenant roster</h2></div>
-  <p class="sec-sub">Enter leased area, each tenant's admin fee %, and CAM rate — estimated CAM paid recalculates automatically as you type. If a tenant moved in or out partway through the period, enter their actual months (and extra days) occupied — leave blank to assume the full period. Or upload a roster file (columns: tenant, area, admin fee %, estimated paid, CAM rate, unit ID, lease start, lease end, occupancy start, occupancy end, months occupied, days occupied).</p>
-
-  <div class="panel" style="margin-bottom:1.2rem;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-    <label style="font-size:13px;color:var(--ink-soft);white-space:nowrap;">Months covered by this reconciliation</label>
-    <input type="number" id="monthsCovered" value="6" min="1" max="12" step="1" style="width:80px;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-family:var(--font-mono);background:var(--panel);color:var(--ink);">
-    <label style="font-size:13px;color:var(--ink-soft);white-space:nowrap;margin-left:10px;">Total property area (sq ft)</label>
-    <input type="number" id="areaOverride" value="" min="0" step="1" placeholder="auto-sum" style="width:110px;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-family:var(--font-mono);background:var(--panel);color:var(--ink);">
-    <span class="hint" style="margin:0;">Leave blank to auto-sum tenant areas. Set this explicitly if two tenants share one suite at different times (a mid-year turnover), so the space isn't counted twice.</span>
-    <input type="hidden" id="adminFeePct" value="15">
-    <input type="hidden" id="vacantArea" value="0">
-    <input type="hidden" id="camRate" value="9.71">
+  <div class="sec-head"><span class="sec-num">2</span><h2>Reconciliation period</h2></div>
+  <p class="sec-sub">Admin fee % and CAM rate are already set per tenant in the roster — this step just sets the time period and applies it.</p>
+  <div class="panel">
+    <div class="field" style="max-width:360px;">
+      <label style="font-size:14px;color:var(--ink);margin-bottom:8px;">Months covered by this reconciliation</label>
+      <input type="number" id="monthsCovered" value="6" min="1" max="12" step="1" style="font-size:18px;padding:12px 14px;">
+      <div class="hint">e.g. 6 for an interim Jan–Jun run, 12 for a full year. This should match the period of the report you uploaded in Step 1.</div>
+    </div>
+    <button class="primary" id="applyRateBtn" style="margin-top:1rem;">Apply to all tenants →</button>
+    <div class="hint" id="periodPreview" style="margin-top:10px;color:var(--ink);"></div>
+    <div class="hint" style="margin-top:8px;">Each tenant's estimated CAM paid is calculated automatically from their own CAM rate, area and the months/days they occupied in this period. Any amount you type manually in the tenant roster is kept and never overwritten. The period end date (Step 4) follows this number of months.</div>
   </div>
+  <input type="hidden" id="adminFeePct" value="15">
+  <input type="hidden" id="vacantArea" value="0">
+  <input type="hidden" id="camRate" value="9.71">
+</section>
+<div class="step-nav">
+  <button onclick="goToStep(1)">← Back</button>
+  <div class="spacer"></div>
+  <button class="primary" onclick="goToStep(3)">Next: Tenant roster →</button>
+</div>
+</div>
+
+<div class="wizard-step" data-step="3">
+<section style="max-width:1340px;">
+  <div class="sec-head"><span class="sec-num">3</span><h2>Tenant roster</h2></div>
+  <p class="sec-sub">Enter each tenant's area, CAM rate and admin fee %. The shaded columns set the reconciliation period for each tenant: it starts as the full period from Step 2, and you can type a different From / To date (e.g. a tenant who moved in mid-year) or type the number of days directly. CAM is charged for that tenant's days only.</p>
 
   <div class="panel" style="margin-bottom:1.2rem;">
     <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;">Area allocation</div>
@@ -437,25 +473,39 @@
       <input type="file" id="tenantFileInput" accept=".csv,.xlsx,.xls">
     </div>
     <div style="overflow-x:auto;">
-    <table id="tenantTable" style="min-width:1180px;">
+    <table id="tenantTable">
+      <colgroup>
+        <col style="width:190px;"><col style="width:74px;"><col style="width:84px;"><col style="width:84px;"><col style="width:70px;">
+        <col style="width:124px;"><col style="width:124px;">
+        <col style="width:124px;"><col style="width:124px;"><col style="width:70px;">
+        <col style="width:118px;"><col style="width:36px;">
+      </colgroup>
       <thead>
+        <tr class="group-row">
+          <th colspan="5"></th>
+          <th colspan="2" class="grp">Lease</th>
+          <th colspan="3" class="grp grp-recon">Reconciliation period for this tenant</th>
+          <th colspan="2"></th>
+        </tr>
         <tr>
-          <th style="width:14%;">Tenant name</th>
-          <th style="width:7%;">Unit ID</th>
-          <th style="width:9%;">Area (sq ft)</th>
-          <th style="width:9%;">CAM rate ($/sqft/yr)</th>
-          <th style="width:7%;">Admin %</th>
-          <th style="width:12%;">Est. CAM paid ($)</th>
-          <th style="width:8%;">Months occupied</th>
-          <th style="width:6%;">+ Days</th>
-          <th style="width:9%;">Lease start</th>
-          <th style="width:9%;">Lease end</th>
-          <th style="width:5%;"></th>
+          <th>Tenant name</th>
+          <th>Unit ID</th>
+          <th class="th-num">Area (sq ft)</th>
+          <th class="th-num">CAM rate $/sf/yr</th>
+          <th class="th-num">Admin %</th>
+          <th>Start</th>
+          <th>End</th>
+          <th class="recon-col">From</th>
+          <th class="recon-col">To</th>
+          <th class="recon-col th-num">Days</th>
+          <th class="th-num">Est. CAM paid ($)</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tenantBody"></tbody>
     </table>
     </div>
+    <div class="roster-legend"><i>Grey italic</i> = filled in automatically. Type over any grey value to set it yourself; clear the field to go back to automatic. Est. CAM paid = CAM rate ÷ 12 × area × months × (tenant days ÷ period days).</div>
     <div class="row-actions">
       <button id="addTenantBtn">+ Add tenant</button>
       <button id="applyAdminBtn">Apply default admin fee % to all tenants →</button>
@@ -463,15 +513,15 @@
   </div>
 </section>
 <div class="step-nav">
-  <button onclick="goToStep(1)">← Back</button>
+  <button onclick="goToStep(2)">← Back</button>
   <div class="spacer"></div>
-  <button class="primary" onclick="goToStep(3)">Next: Invoice details →</button>
+  <button class="primary" onclick="goToStep(4)">Next: Invoice details →</button>
 </div>
 </div>
 
-<div class="wizard-step" data-step="3">
+<div class="wizard-step" data-step="4">
 <section>
-  <div class="sec-head"><span class="sec-num">3</span><h2>Invoice details</h2></div>
+  <div class="sec-head"><span class="sec-num">4</span><h2>Invoice details</h2></div>
   <p class="sec-sub">Used when generating individual tenant CAM recovery invoices.</p>
   <div class="panel settings-grid">
     <div class="field">
@@ -510,14 +560,14 @@
   </div>
 </section>
 <div class="step-nav">
-  <button onclick="goToStep(2)">← Back</button>
+  <button onclick="goToStep(3)">← Back</button>
   <div class="spacer"></div>
   <button class="primary" id="calcBtn">Calculate CAM reconciliation →</button>
 </div>
 </div>
 
 <section id="resultsSection">
-  <div class="sec-head"><span class="sec-num">4</span><h2>Reconciliation results</h2></div>
+  <div class="sec-head"><span class="sec-num">5</span><h2>Reconciliation results</h2></div>
   <p class="sec-sub" id="periodLabel"></p>
   <div class="cards" id="summaryCards"></div>
   <div class="panel">
@@ -527,7 +577,7 @@
           <th>Tenant</th>
           <th style="text-align:right;">Area</th>
           <th style="text-align:right;">Share</th>
-          <th style="text-align:right;">Occupancy</th>
+          <th style="text-align:right;">Days</th>
           <th style="text-align:right;">Admin %</th>
           <th style="text-align:right;">CAM due</th>
           <th style="text-align:right;">Est. paid</th>
@@ -539,18 +589,19 @@
     </table>
     <div class="row-actions">
       <button id="exportBtn">Download results as CSV</button>
-      <button id="exportExcelBtn">Download results as Excel (.xlsx)</button>
     </div>
     <p class="footer-note">True-up shown as amber = additional amount due from tenant. Green = credit owed to tenant. Figures assume expense lines tagged "excluded" (taxes/insurance) are kept out of the admin fee base but still included in the CAM pool billed to tenants.</p>
   </div>
 </section>
 <div class="step-nav">
-  <button onclick="goToStep(3)">← Back to edit</button>
+  <button onclick="goToStep(4)">← Back to edit</button>
   <div class="spacer"></div>
 </div>
 
 <script>
 const TAX_INSURANCE_RE = /tax|insur/i;
+// Fixed total property area (sq ft) used for every tenant's pro-rata share.
+const PROPERTY_AREA = 26449;
 const TENANT_COLORS = ['#1F5C4C','#B7621B','#4B5D6B','#2E6B3E','#7C5CBF','#A3402F','#1F6C8C','#8C6B1F','#6B4B8C','#3C7C6B','#8C4B4B','#4B6B8C','#6B8C4B','#8C4B6B','#4B8C7C'];
 
 let currentStep = 1;
@@ -558,7 +609,7 @@ function goToStep(n){
   document.querySelectorAll('.wizard-step').forEach(el => {
     el.classList.toggle('active', Number(el.dataset.step) === n);
   });
-  document.getElementById('resultsSection').style.display = (n === 4) ? 'block' : 'none';
+  document.getElementById('resultsSection').style.display = (n === 5) ? 'block' : 'none';
   document.querySelectorAll('.step-item').forEach(el => {
     const s = Number(el.dataset.step);
     el.classList.toggle('active', s === n);
@@ -573,21 +624,21 @@ let expenseIdCtr = 0;
 let detectedCamEstimate = null;
 
 let tenants = [
-  {id:1, name:'Precision Jewelers', area:1450, estPaid:0, adminPct:10, unitId:'2752', leaseStart:'2025-08-01', leaseEnd:'2030-12-31', occStart:'2025-08-01', occEnd:'2030-12-31', camRate:9.72, occMonths:null, occDays:0},
-  {id:2, name:'Athena Greek House', area:1500, estPaid:0, adminPct:15, unitId:'2708', leaseStart:'2023-03-15', leaseEnd:'2028-06-15', occStart:'2023-03-15', occEnd:'2028-06-15', camRate:9.71, occMonths:null, occDays:0},
-  {id:3, name:'Dr. Wheaton DDS', area:2032, estPaid:0, adminPct:15, unitId:'2760', leaseStart:'2018-11-01', leaseEnd:'2028-07-31', occStart:'2018-11-01', occEnd:'2028-07-31', camRate:9.71, occMonths:null, occDays:0},
-  {id:4, name:'H&R Block', area:1320, estPaid:0, adminPct:15, unitId:'2766', leaseStart:'2022-05-01', leaseEnd:'2027-04-30', occStart:'2022-05-01', occEnd:'2027-04-30', camRate:9.71, occMonths:null, occDays:0},
-  {id:5, name:'Bank of America', area:1305, estPaid:0, adminPct:5, unitId:'2770', leaseStart:'2028-11-01', leaseEnd:'2028-12-31', occStart:'2028-11-01', occEnd:'2028-12-31', camRate:9.71, occMonths:null, occDays:0},
-  {id:6, name:'Sunny Street Cafe', area:3142, estPaid:0, adminPct:15, unitId:'2788', leaseStart:'2025-08-01', leaseEnd:'2030-07-31', occStart:'2025-08-01', occEnd:'2030-07-31', camRate:9.72, occMonths:null, occDays:0},
-  {id:7, name:'Novacare', area:2428, estPaid:0, adminPct:15, unitId:'2794', leaseStart:'2026-01-01', leaseEnd:'2033-02-28', occStart:'2026-01-01', occEnd:'2033-02-28', camRate:9.8, occMonths:null, occDays:0},
-  {id:8, name:'Smoke Shop', area:1220, estPaid:0, adminPct:15, unitId:'2764', leaseStart:'2024-11-01', leaseEnd:'2030-01-01', occStart:'2024-11-01', occEnd:'2030-01-01', camRate:9.72, occMonths:null, occDays:0},
-  {id:9, name:'Mariner Finance', area:1450, estPaid:0, adminPct:15, unitId:'2748', leaseStart:'2023-08-01', leaseEnd:'2028-07-01', occStart:'2023-08-01', occEnd:'2028-07-01', camRate:9.71, occMonths:null, occDays:0},
-  {id:10, name:'Total Vet Care (TVC)', area:1865, estPaid:0, adminPct:15, unitId:'2802', leaseStart:'2016-10-01', leaseEnd:'2026-09-30', occStart:'2016-10-01', occEnd:'2026-09-30', camRate:9.71, occMonths:null, occDays:0},
-  {id:11, name:'Paskalia / Mr. Hibachi', area:1450, estPaid:0, adminPct:15, unitId:'2806', leaseStart:'2023-03-15', leaseEnd:'2028-05-31', occStart:'2023-03-15', occEnd:'2028-05-31', camRate:9.71, occMonths:null, occDays:0},
-  {id:12, name:'State Farm Insurance', area:1605, estPaid:0, adminPct:10, unitId:'2810', leaseStart:'2022-09-01', leaseEnd:'2027-08-31', occStart:'2022-09-01', occEnd:'2027-08-31', camRate:9.71, occMonths:null, occDays:0},
-  {id:13, name:'Jimmy Johns', area:1375, estPaid:0, adminPct:10, unitId:'2814', leaseStart:'2025-01-01', leaseEnd:'2029-12-31', occStart:'2025-01-01', occEnd:'2029-12-31', camRate:9.71, occMonths:null, occDays:0},
-  {id:14, name:'Petland ( New TVC)', area:2980, estPaid:0, adminPct:15, unitId:'2740', leaseStart:'2026-03-20', leaseEnd:'2036-05-19', occStart:'2026-05-19', occEnd:'2036-05-19', camRate:9.72, occMonths:null, occDays:0},
-  {id:15, name:'IVX', area:2180, estPaid:0, adminPct:10, unitId:'2856', leaseStart:'2020-12-07', leaseEnd:'2030-12-26', occStart:'2020-12-07', occEnd:'2030-12-26', camRate:9.71, occMonths:null, occDays:0},
+  {id:1, name:'Precision Jewelers', area:1450, estPaid:null, adminPct:10, unitId:'2752', leaseStart:'2025-08-01', leaseEnd:'2030-12-31', occStart:'2025-08-01', occEnd:'2030-12-31', camRate:9.72},
+  {id:2, name:'Athena Greek House', area:1500, estPaid:null, adminPct:15, unitId:'2708', leaseStart:'2023-03-15', leaseEnd:'2028-06-15', occStart:'2023-03-15', occEnd:'2028-06-15', camRate:9.71},
+  {id:3, name:'Dr. Wheaton DDS', area:2032, estPaid:null, adminPct:15, unitId:'2760', leaseStart:'2018-11-01', leaseEnd:'2028-07-31', occStart:'2018-11-01', occEnd:'2028-07-31', camRate:9.71},
+  {id:4, name:'H&R Block', area:1320, estPaid:null, adminPct:15, unitId:'2766', leaseStart:'2022-05-01', leaseEnd:'2027-04-30', occStart:'2022-05-01', occEnd:'2027-04-30', camRate:9.71},
+  {id:5, name:'Bank of America', area:1305, estPaid:null, adminPct:5, unitId:'2770', leaseStart:'2028-11-01', leaseEnd:'2028-12-31', occStart:'2028-11-01', occEnd:'2028-12-31', camRate:9.71},
+  {id:6, name:'Sunny Street Cafe', area:2289, estPaid:null, adminPct:15, unitId:'2788', leaseStart:'2025-08-01', leaseEnd:'2030-07-31', occStart:'2025-08-01', occEnd:'2030-07-31', camRate:9.72},
+  {id:7, name:'Hammar & Nails (Novacare)', area:2428, estPaid:null, adminPct:15, unitId:'2794', leaseStart:'2026-01-01', leaseEnd:'2033-02-28', occStart:'2026-01-01', occEnd:'2033-02-28', camRate:9.8},
+  {id:8, name:'Smoke Shop', area:1220, estPaid:null, adminPct:15, unitId:'2764', leaseStart:'2024-11-01', leaseEnd:'2030-01-01', occStart:'2024-11-01', occEnd:'2030-01-01', camRate:9.72},
+  {id:9, name:'Mariner Finance', area:1450, estPaid:null, adminPct:15, unitId:'2748', leaseStart:'2023-08-01', leaseEnd:'2028-07-01', occStart:'2023-08-01', occEnd:'2028-07-01', camRate:9.71},
+  {id:10, name:'Total Vet Care (TVC)', area:1865, estPaid:null, adminPct:15, unitId:'2802', leaseStart:'2016-10-01', leaseEnd:'2026-09-30', occStart:'2016-10-01', occEnd:'2026-09-30', camRate:9.71},
+  {id:11, name:'Paskalia / Mr. Hibachi', area:1450, estPaid:null, adminPct:15, unitId:'2806', leaseStart:'2023-03-15', leaseEnd:'2028-05-31', occStart:'2023-03-15', occEnd:'2028-05-31', camRate:9.71},
+  {id:12, name:'State Farm Insurance', area:1605, estPaid:null, adminPct:10, unitId:'2810', leaseStart:'2022-09-01', leaseEnd:'2027-08-31', occStart:'2022-09-01', occEnd:'2027-08-31', camRate:9.71},
+  {id:13, name:'Jimmy Johns', area:1375, estPaid:null, adminPct:10, unitId:'2814', leaseStart:'2025-01-01', leaseEnd:'2029-12-31', occStart:'2025-01-01', occEnd:'2029-12-31', camRate:9.71},
+  {id:14, name:'Petland ( New TVC)', area:2980, estPaid:null, adminPct:15, unitId:'2740', leaseStart:'2026-03-20', leaseEnd:'2036-05-19', occStart:'2026-05-19', occEnd:'2036-05-19', camRate:9.72},
+  {id:15, name:'IVX', area:2180, estPaid:null, adminPct:10, unitId:'2856', leaseStart:'2020-12-07', leaseEnd:'2030-12-26', occStart:'2020-12-07', occEnd:'2030-12-26', camRate:9.71},
 ];
 let tenantIdCtr = 15;
 
@@ -602,6 +653,75 @@ function fmtMoney(n){
 function fmtPct(n){
   n = Number.isFinite(n) ? n : 0;
   return n.toFixed(2) + '%';
+}
+// Signed money: credits show as -$1,234.56 (never an absolute value)
+function fmtSigned(n){
+  n = Number.isFinite(n) ? n : 0;
+  if(Math.abs(n) < 0.005) return fmtMoney(0);
+  return n < 0 ? '-' + fmtMoney(-n) : fmtMoney(n);
+}
+
+// ---- Dates & occupancy (all in UTC to avoid daylight-saving shifts) ----
+const DAY_MS = 86400000;
+function parseISO(s){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||'').trim());
+  return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null;
+}
+function toISO(ms){ return new Date(ms).toISOString().slice(0,10); }
+function addMonthsUTC(ms, k){
+  const d = new Date(ms);
+  const y = d.getUTCFullYear(), mo = d.getUTCMonth() + k, day = d.getUTCDate();
+  const dim = new Date(Date.UTC(y, mo+1, 0)).getUTCDate();
+  return Date.UTC(y, mo, Math.min(day, dim));
+}
+function getPeriod(){
+  const start = parseISO(document.getElementById('periodStart').value);
+  const end = parseISO(document.getElementById('periodEnd').value);
+  if(start === null || end === null || end < start) return null;
+  return {start, end, days: Math.round((end-start)/DAY_MS) + 1};
+}
+function getMonthsCovered(){
+  return parseFloat(document.getElementById('monthsCovered').value) || 12;
+}
+// Each tenant's own reconciliation period. reconStart / reconEnd / reconDays are
+// null when automatic (full period from Step 2 / Step 4) or a manual entry.
+function tenantPeriod(t){
+  const p = getPeriod();
+  if(!p) return null;
+  const s = t.reconStart ? parseISO(t.reconStart) : p.start;
+  const e = t.reconEnd ? parseISO(t.reconEnd) : p.end;
+  const autoDays = (s !== null && e !== null && e >= s) ? Math.round((e-s)/DAY_MS) + 1 : 0;
+  return {start:s, end:e, autoDays, periodDays:p.days};
+}
+function occupancyInfo(t){
+  const tp = tenantPeriod(t);
+  if(!tp) return {frac:1, days:0, periodDays:0, valid:false, start:null, end:null};
+  const days = (t.reconDays !== null && t.reconDays !== undefined) ? t.reconDays : tp.autoDays;
+  return {frac: tp.periodDays ? days/tp.periodDays : 0, days, periodDays: tp.periodDays, valid:true, start:tp.start, end:tp.end};
+}
+function tenantCamRate(t){
+  return (t.camRate !== null && t.camRate !== undefined) ? t.camRate : (parseFloat(document.getElementById('camRate').value) || 0);
+}
+// Automatic estimated CAM paid: CAM rate / 12 × area × months covered × occupied fraction
+function autoEstPaid(t){
+  const o = occupancyInfo(t);
+  return Math.round((tenantCamRate(t)/12) * (t.area||0) * getMonthsCovered() * o.frac * 100) / 100;
+}
+function isManualPaid(t){ return t.estPaid !== null && t.estPaid !== undefined; }
+function effEstPaid(t){ return isManualPaid(t) ? t.estPaid : autoEstPaid(t); }
+
+function syncPeriodEnd(){
+  const start = parseISO(document.getElementById('periodStart').value);
+  const months = Math.round(getMonthsCovered());
+  if(start !== null && months > 0){
+    document.getElementById('periodEnd').value = toISO(addMonthsUTC(start, months) - DAY_MS);
+  }
+  updatePeriodPreview();
+}
+function updatePeriodPreview(){
+  const el = document.getElementById('periodPreview');
+  const p = getPeriod();
+  if(el) el.textContent = p ? `Reconciliation period: ${fmtDateSlash(toISO(p.start))} – ${fmtDateSlash(toISO(p.end))} (${p.days} days)` : 'Reconciliation period dates are not set (Step 4).';
 }
 
 function renderExpenseTable(){
@@ -648,7 +768,6 @@ function renderExpenseTable(){
 function renderTenantTable(){
   const globalRate = parseFloat(document.getElementById('adminFeePct')?.value) || 0;
   const globalCamRate = parseFloat(document.getElementById('camRate')?.value) || 0;
-  const fullMonths = parseFloat(document.getElementById('monthsCovered')?.value) || 12;
   const body = document.getElementById('tenantBody');
   body.innerHTML = tenants.map(t => `
     <tr data-id="${t.id}">
@@ -657,16 +776,45 @@ function renderTenantTable(){
       <td><input type="number" class="area-input num-cell" value="${t.area||''}" min="0" step="1" placeholder="0"></td>
       <td><input type="number" class="camrate-input num-cell" value="${t.camRate !== null && t.camRate !== undefined ? t.camRate : ''}" min="0" step="0.01" placeholder="${globalCamRate}"></td>
       <td><input type="number" class="admin-input num-cell" value="${t.adminPct !== null ? t.adminPct : ''}" min="0" max="100" step="0.1" placeholder="${globalRate}"></td>
-      <td><input type="number" class="paid-input num-cell" value="${t.estPaid||''}" min="0" step="0.01" placeholder="0"></td>
-      <td><input type="number" class="occmonths-input num-cell" value="${t.occMonths !== null && t.occMonths !== undefined ? t.occMonths : ''}" min="0" max="12" step="1" placeholder="${fullMonths}"></td>
-      <td><input type="number" class="occdays-input num-cell" value="${t.occDays || ''}" min="0" max="30" step="1" placeholder="0"></td>
       <td><input type="date" class="lstart-input" value="${t.leaseStart||''}"></td>
       <td><input type="date" class="lend-input" value="${t.leaseEnd||''}"></td>
+      <td class="recon-col"><input type="date" class="rstart-input" title="Tenant's reconciliation start. Clear to use the full period."></td>
+      <td class="recon-col"><input type="date" class="rend-input" title="Tenant's reconciliation end. Clear to use the full period."></td>
+      <td class="recon-col"><input type="number" class="rdays-input num-cell" min="0" step="1" title="Days charged for this tenant. Type to override; clear to calculate from From / To."></td>
+      <td><input type="number" class="paid-input num-cell" min="0" step="0.01" title="Automatic = CAM rate ÷ 12 × area × months × (tenant days ÷ period days). Type to override; clear to return to automatic."></td>
       <td><button class="ghost-del" data-del="${t.id}">&times;</button></td>
     </tr>
   `).join('');
   body.querySelectorAll('tr').forEach(tr => {
     const id = Number(tr.dataset.id);
+    const tt = tenants.find(x=>x.id===id);
+    refreshTenantRow(tr, tt);
+    const paidInput = tr.querySelector('.paid-input');
+    paidInput.addEventListener('input', e => {
+      const v = e.target.value;
+      tt.estPaid = v === '' ? null : (parseFloat(v) || 0);
+      paidInput.classList.toggle('auto-val', !isManualPaid(tt));
+    });
+    paidInput.addEventListener('blur', () => refreshTenantRow(tr, tt));
+    // Editing From / To recalculates Days (any typed Days is replaced)
+    ['rstart','rend'].forEach(k => {
+      const inp = tr.querySelector('.'+k+'-input');
+      inp.addEventListener('input', e => {
+        tt[k === 'rstart' ? 'reconStart' : 'reconEnd'] = e.target.value || null;
+        tt.reconDays = null;
+        inp.classList.toggle('auto-val', !e.target.value);
+        refreshTenantRow(tr, tt);
+      });
+      inp.addEventListener('blur', () => refreshTenantRow(tr, tt));
+    });
+    const daysInput = tr.querySelector('.rdays-input');
+    daysInput.addEventListener('input', e => {
+      const v = e.target.value;
+      tt.reconDays = v === '' ? null : Math.max(0, parseFloat(v) || 0);
+      daysInput.classList.toggle('auto-val', v === '');
+      refreshTenantRow(tr, tt);
+    });
+    daysInput.addEventListener('blur', () => refreshTenantRow(tr, tt));
     tr.querySelector('.name-input').addEventListener('input', e => {
       tenants.find(x=>x.id===id).name = e.target.value;
       renderAreaStrip();
@@ -676,23 +824,8 @@ function renderTenantTable(){
     });
     tr.querySelector('.camrate-input').addEventListener('input', e => {
       const v = e.target.value;
-      const t = tenants.find(x=>x.id===id);
-      t.camRate = v === '' ? null : (parseFloat(v) || 0);
-      recalcEstPaid(t);
-      tr.querySelector('.paid-input').value = t.estPaid;
-    });
-    tr.querySelector('.occmonths-input').addEventListener('input', e => {
-      const v = e.target.value;
-      const t = tenants.find(x=>x.id===id);
-      t.occMonths = v === '' ? null : (parseFloat(v) || 0);
-      recalcEstPaid(t);
-      tr.querySelector('.paid-input').value = t.estPaid;
-    });
-    tr.querySelector('.occdays-input').addEventListener('input', e => {
-      const t = tenants.find(x=>x.id===id);
-      t.occDays = parseFloat(e.target.value) || 0;
-      recalcEstPaid(t);
-      tr.querySelector('.paid-input').value = t.estPaid;
+      tenants.find(x=>x.id===id).camRate = v === '' ? null : (parseFloat(v) || 0);
+      refreshTenantRow(tr, tt);
     });
     tr.querySelector('.lstart-input').addEventListener('input', e => {
       tenants.find(x=>x.id===id).leaseStart = e.target.value;
@@ -701,18 +834,13 @@ function renderTenantTable(){
       tenants.find(x=>x.id===id).leaseEnd = e.target.value;
     });
     tr.querySelector('.area-input').addEventListener('input', e => {
-      const t = tenants.find(x=>x.id===id);
-      t.area = parseFloat(e.target.value) || 0;
+      tenants.find(x=>x.id===id).area = parseFloat(e.target.value) || 0;
+      refreshTenantRow(tr, tt);
       renderAreaStrip();
-      recalcEstPaid(t);
-      tr.querySelector('.paid-input').value = t.estPaid;
     });
     tr.querySelector('.admin-input').addEventListener('input', e => {
       const v = e.target.value;
       tenants.find(x=>x.id===id).adminPct = v === '' ? null : (parseFloat(v) || 0);
-    });
-    tr.querySelector('.paid-input').addEventListener('input', e => {
-      tenants.find(x=>x.id===id).estPaid = parseFloat(e.target.value) || 0;
     });
     tr.querySelector('[data-del]').addEventListener('click', () => {
       tenants = tenants.filter(x=>x.id!==id);
@@ -722,12 +850,34 @@ function renderTenantTable(){
   });
 }
 
+// Update the derived cells of one roster row in place (keeps typing focus)
+function refreshTenantRow(tr, t){
+  const o = occupancyInfo(t);
+  const setAuto = (sel, manual, autoVal) => {
+    const inp = tr.querySelector(sel);
+    if(document.activeElement === inp) return;
+    if(!manual){ inp.value = autoVal; }
+    inp.classList.toggle('auto-val', !manual);
+  };
+  setAuto('.rstart-input', !!t.reconStart, o.start !== null && o.valid ? toISO(o.start) : '');
+  setAuto('.rend-input', !!t.reconEnd, o.end !== null && o.valid ? toISO(o.end) : '');
+  if(t.reconStart) tr.querySelector('.rstart-input').value = t.reconStart;
+  if(t.reconEnd) tr.querySelector('.rend-input').value = t.reconEnd;
+  const manualDays = t.reconDays !== null && t.reconDays !== undefined;
+  setAuto('.rdays-input', manualDays, o.days);
+  if(manualDays && document.activeElement !== tr.querySelector('.rdays-input')) tr.querySelector('.rdays-input').value = t.reconDays;
+  tr.querySelector('.rdays-input').title = o.valid ? `${o.days} of ${o.periodDays} days (${fmtPct(o.frac*100)} of the period). Type to override; clear to calculate from From / To.` : '';
+  setAuto('.paid-input', isManualPaid(t), autoEstPaid(t));
+  if(isManualPaid(t) && document.activeElement !== tr.querySelector('.paid-input')) tr.querySelector('.paid-input').value = t.estPaid;
+}
+
 function renderAreaStrip(){
   const strip = document.getElementById('areaStrip');
   const legend = document.getElementById('areaLegend');
-  const vacant = parseFloat(document.getElementById('vacantArea')?.value) || 0;
+  const leased = tenants.filter(t => t.area > 0).reduce((s,t)=>s+t.area,0);
+  const vacant = Math.max(0, PROPERTY_AREA - leased);
   const active = tenants.filter(t => t.area > 0);
-  const total = active.reduce((s,t)=>s+t.area,0) + vacant;
+  const total = Math.max(PROPERTY_AREA, leased);
   if(total <= 0){
     strip.innerHTML = `<div class="strip-seg" style="width:100%;background:var(--line);"></div>`;
     legend.innerHTML = `<span>Enter leased areas below to see the plaza's area allocation.</span>`;
@@ -742,9 +892,11 @@ function renderAreaStrip(){
     segs += `<div class="strip-seg" style="width:${pct}%;background:var(--line);" title="Vacant: ${fmtPct(pct)}"></div>`;
   }
   strip.innerHTML = segs;
-  legend.innerHTML = active.map((t,i) => `
-    <span><span class="dot" style="background:${TENANT_COLORS[i % TENANT_COLORS.length]};"></span>${t.name || 'Tenant '+t.id} · ${fmtPct(t.area/total*100)}</span>
-  `).join('') + (vacant > 0 ? `<span><span class="dot" style="background:var(--line);"></span>Vacant · ${fmtPct(vacant/total*100)}</span>` : '');
+  const head = `<span style="flex-basis:100%;color:var(--ink);">Property area: <strong>${fmt(PROPERTY_AREA)} sq ft</strong> (fixed) · Leased in roster: ${fmt(leased)} sq ft</span>`
+    + (leased > PROPERTY_AREA ? `<span style="flex-basis:100%;color:var(--red);">Tenant areas add up to ${fmt(leased - PROPERTY_AREA)} sq ft more than the property area — check the roster.</span>` : '');
+  legend.innerHTML = head + active.map((t,i) => `
+    <span><span class="dot" style="background:${TENANT_COLORS[i % TENANT_COLORS.length]};"></span>${t.name || 'Tenant '+t.id} · ${fmtPct(t.area/PROPERTY_AREA*100)}</span>
+  `).join('') + (vacant > 0 ? `<span><span class="dot" style="background:var(--line);"></span>Vacant · ${fmtPct(vacant/PROPERTY_AREA*100)}</span>` : '');
 }
 
 document.getElementById('addExpenseBtn').addEventListener('click', () => {
@@ -754,26 +906,21 @@ document.getElementById('addExpenseBtn').addEventListener('click', () => {
 });
 document.getElementById('addTenantBtn').addEventListener('click', () => {
   tenantIdCtr++;
-  tenants.push({id:tenantIdCtr, name:'', area:0, estPaid:0});
+  tenants.push({id:tenantIdCtr, name:'', area:0, estPaid:null, adminPct:null, camRate:null, unitId:'', leaseStart:'', leaseEnd:'', occStart:'', occEnd:'', reconStart:null, reconEnd:null, reconDays:null});
   renderTenantTable();
   renderAreaStrip();
 });
 document.getElementById('vacantArea').addEventListener('input', renderAreaStrip);
-
-function recalcEstPaid(t){
-  const annualRate = parseFloat(document.getElementById('camRate').value) || 0;
-  const months = parseFloat(document.getElementById('monthsCovered').value) || 12;
-  const rate = (t.camRate !== null && t.camRate !== undefined) ? t.camRate : annualRate;
-  const occupiedMonths = (t.occMonths !== null && t.occMonths !== undefined && t.occMonths !== '')
-    ? (parseFloat(t.occMonths) || 0) + (parseFloat(t.occDays)||0)/30
-    : months;
-  t.estPaid = Math.round((rate/12) * t.area * occupiedMonths * 100) / 100;
-}
-function recalcAllEstPaid(){
-  tenants.forEach(recalcEstPaid);
+// Automatic estimates recalculate from the months covered; manual entries are never overwritten.
+document.getElementById('applyRateBtn').addEventListener('click', () => {
+  syncPeriodEnd();
   renderTenantTable();
-}
-document.getElementById('monthsCovered').addEventListener('input', recalcAllEstPaid);
+  const manual = tenants.filter(isManualPaid).length;
+  alert(`Updated estimated CAM paid for ${tenants.length - manual} tenant${tenants.length - manual === 1 ? '' : 's'} using ${getMonthsCovered()} month(s) and each tenant's reconciliation days.` + (manual ? ` ${manual} manually entered amount${manual===1?' was':'s were'} kept unchanged.` : ''));
+});
+document.getElementById('monthsCovered').addEventListener('input', () => { syncPeriodEnd(); renderTenantTable(); });
+document.getElementById('periodStart').addEventListener('input', () => { syncPeriodEnd(); renderTenantTable(); });
+document.getElementById('periodEnd').addEventListener('input', () => { updatePeriodPreview(); renderTenantTable(); });
 document.getElementById('applyAdminBtn').addEventListener('click', () => {
   const rate = parseFloat(document.getElementById('adminFeePct').value) || 0;
   tenants.forEach(t => { t.adminPct = rate; });
@@ -784,7 +931,7 @@ document.getElementById('applyCamEstimateBtn').addEventListener('click', () => {
   const months = parseFloat(document.getElementById('monthsCovered').value) || 12;
   const knownTenants = tenants.filter(t => t.camRate !== null && t.camRate !== undefined);
   const unknownTenants = tenants.filter(t => t.camRate === null || t.camRate === undefined);
-  const knownTotal = knownTenants.reduce((s,t)=> s + (t.camRate/12)*t.area*months, 0);
+  const knownTotal = knownTenants.reduce((s,t)=> s + autoEstPaid(t), 0);
   const remainingTotal = detectedCamEstimate.amount - knownTotal;
   const remainingArea = unknownTenants.reduce((s,t)=>s+(t.area||0),0);
 
@@ -794,7 +941,7 @@ document.getElementById('applyCamEstimateBtn').addEventListener('click', () => {
     return;
   }
   if(remainingArea <= 0 && unknownTenants.length){ alert('Enter tenant areas first (Section 3) so the remainder can be prorated.'); return; }
-  knownTenants.forEach(t => { t.estPaid = Math.round((t.camRate/12)*t.area*months*100)/100; });
+  knownTenants.forEach(t => { t.estPaid = null; }); // automatic: rate × area × months occupied
   unknownTenants.forEach(t => {
     t.estPaid = remainingArea > 0 ? Math.round((t.area/remainingArea) * remainingTotal * 100) / 100 : 0;
   });
@@ -852,7 +999,7 @@ function handleTenantFile(file){
         const adminRaw = row[2];
         const adminPct = (adminRaw !== undefined && adminRaw !== null && adminRaw !== '') ? parseFloat(String(adminRaw).replace(/[^0-9.\-]/g,'')) : null;
         const paidRaw = row[3];
-        const estPaid = (paidRaw !== undefined && paidRaw !== null && paidRaw !== '') ? parseFloat(String(paidRaw).replace(/[^0-9.\-]/g,'')) || 0 : 0;
+        const estPaid = (paidRaw !== undefined && paidRaw !== null && paidRaw !== '') ? parseFloat(String(paidRaw).replace(/[^0-9.\-]/g,'')) || 0 : null;
         const camRateRaw = row[4];
         const camRate = (camRateRaw !== undefined && camRateRaw !== null && camRateRaw !== '') ? parseFloat(String(camRateRaw).replace(/[^0-9.\-]/g,'')) : null;
         const unitId = row[5] !== undefined && row[5] !== null ? String(row[5]).trim() : '';
@@ -860,11 +1007,7 @@ function handleTenantFile(file){
         const leaseEnd = row[7] !== undefined && row[7] !== null ? String(row[7]).trim() : '';
         const occStart = row[8] !== undefined && row[8] !== null ? String(row[8]).trim() : leaseStart;
         const occEnd = row[9] !== undefined && row[9] !== null ? String(row[9]).trim() : leaseEnd;
-        const occMonthsRaw = row[10];
-        const occMonths = (occMonthsRaw !== undefined && occMonthsRaw !== null && occMonthsRaw !== '') ? parseFloat(String(occMonthsRaw).replace(/[^0-9.\-]/g,'')) : null;
-        const occDaysRaw = row[11];
-        const occDays = (occDaysRaw !== undefined && occDaysRaw !== null && occDaysRaw !== '') ? parseFloat(String(occDaysRaw).replace(/[^0-9.\-]/g,'')) || 0 : 0;
-        parsed.push({id: ++tenantIdCtr, name, area, estPaid, adminPct: (adminPct===null || isNaN(adminPct)) ? null : adminPct, camRate: (camRate===null || isNaN(camRate)) ? null : camRate, unitId, leaseStart, leaseEnd, occStart, occEnd, occMonths: (occMonths===null||isNaN(occMonths))?null:occMonths, occDays});
+        parsed.push({id: ++tenantIdCtr, name, area, estPaid, adminPct: (adminPct===null || isNaN(adminPct)) ? null : adminPct, camRate: (camRate===null || isNaN(camRate)) ? null : camRate, unitId, leaseStart, leaseEnd, occStart, occEnd});
       });
       if(parsed.length){
         tenants = parsed;
@@ -1043,20 +1186,8 @@ function handleFile(file){
 
 let lastResults = null;
 
-function computeOccupancyFraction(tenant, fullMonths){
-  if(tenant.occMonths === null || tenant.occMonths === undefined || tenant.occMonths === ''){
-    return 1;
-  }
-  const months = parseFloat(tenant.occMonths) || 0;
-  const days = parseFloat(tenant.occDays) || 0;
-  const occupiedMonths = months + (days/30);
-  if(!fullMonths || fullMonths <= 0) return 1;
-  return Math.max(0, Math.min(1, occupiedMonths / fullMonths));
-}
-
 document.getElementById('calcBtn').addEventListener('click', () => {
   const defaultAdminPct = parseFloat(document.getElementById('adminFeePct').value) || 0;
-  const vacantArea = parseFloat(document.getElementById('vacantArea').value) || 0;
   const monthsCovered = parseFloat(document.getElementById('monthsCovered').value) || 12;
 
   document.getElementById('periodLabel').textContent = `This reconciliation covers ${monthsCovered} month${monthsCovered==1?'':'s'}. Expense totals and estimated payments should both reflect that same period.`;
@@ -1065,33 +1196,42 @@ document.getElementById('calcBtn').addEventListener('click', () => {
   const adminFeeBase = expenses.filter(e=>!e.excluded).reduce((s,e)=>s+e.amount,0);
 
   const activeTenants = tenants.filter(t => t.area > 0);
-  const areaOverrideRaw = parseFloat(document.getElementById('areaOverride')?.value);
-  const summedArea = activeTenants.reduce((s,t)=>s+t.area,0) + vacantArea;
-  const totalArea = (areaOverrideRaw && areaOverrideRaw > 0) ? areaOverrideRaw : summedArea;
+  const totalArea = PROPERTY_AREA;
 
   const rows = activeTenants.map(t => {
     const share = totalArea > 0 ? t.area/totalArea : 0;
     const rate = (t.adminPct !== null && t.adminPct !== undefined) ? t.adminPct : defaultAdminPct;
-    const opexShare = share * totalOpex;
-    const adminFeeShare = share * adminFeeBase * (rate/100);
-    const grossShare = opexShare + adminFeeShare;
-    const occFraction = computeOccupancyFraction(t, monthsCovered);
-    const camDue = grossShare * occFraction;
-    const trueUp = camDue - (t.estPaid||0);
-    return {...t, share, rate, opexShare, adminFeeShare, grossShare, occFraction, camDue, trueUp};
+    const occ = occupancyInfo(t);
+    const occFrac = occ.frac;
+    // Full-period share, then prorated by the months/days the tenant occupied
+    const opexShareFull = share * totalOpex;
+    const adminFeeShareFull = share * adminFeeBase * (rate/100);
+    const camDueFull = opexShareFull + adminFeeShareFull;
+    const opexShare = opexShareFull * occFrac;
+    const adminFeeShare = adminFeeShareFull * occFrac;
+    const camDue = camDueFull * occFrac;
+    const estPaid = effEstPaid(t);
+    const trueUp = camDue - estPaid;
+    return {...t, estPaid, share, rate, occ, occFrac, opexShareFull, adminFeeShareFull, camDueFull, opexShare, adminFeeShare, camDue, trueUp};
   });
 
   const totalAdminFee = rows.reduce((s,r)=>s+r.adminFeeShare,0);
-  const totalCAMPool = totalOpex + totalAdminFee;
-  const totalCollected = activeTenants.reduce((s,t)=>s+(t.estPaid||0),0);
-  const netPosition = totalCAMPool - totalCollected;
+  const totalBilled = rows.reduce((s,r)=>s+r.camDue,0);
+  const totalCAMPool = totalBilled;
+  const totalCollected = rows.reduce((s,r)=>s+r.estPaid,0);
+  const netPosition = totalBilled - totalCollected;
+  const unrecoveredOpex = totalOpex - rows.reduce((s,r)=>s+r.opexShare,0);
 
-  lastResults = {totalOpex, adminFeeBase, totalAdminFee, totalCAMPool, totalArea, totalCollected, netPosition, rows, defaultAdminPct, monthsCovered, expensesSnapshot: expenses.map(e=>({...e}))};
+  lastResults = {totalOpex, adminFeeBase, totalAdminFee, totalCAMPool, totalBilled, unrecoveredOpex, totalArea, totalCollected, netPosition, rows, defaultAdminPct, monthsCovered, expensesSnapshot: expenses.map(e=>({...e}))};
+
+  if(unrecoveredOpex > 0.5){
+    document.getElementById('periodLabel').textContent += ` ${fmtMoney(unrecoveredOpex)} of operating expenses falls outside tenants' reconciliation periods and is not billed to tenants.`;
+  }
 
   document.getElementById('summaryCards').innerHTML = `
     <div class="card"><div class="label">Total operating expenses</div><div class="value">${fmtMoney(totalOpex)}</div></div>
-    <div class="card"><div class="label">Total admin fee (blended)</div><div class="value">${fmtMoney(totalAdminFee)}</div></div>
-    <div class="card"><div class="label">Total CAM pool (opex + fee)</div><div class="value">${fmtMoney(totalCAMPool)}</div></div>
+    <div class="card"><div class="label">Total admin fee billed</div><div class="value">${fmtMoney(totalAdminFee)}</div></div>
+    <div class="card"><div class="label">Total CAM billed to tenants</div><div class="value">${fmtMoney(totalBilled)}</div></div>
     <div class="card"><div class="label">Estimated CAM collected</div><div class="value">${fmtMoney(totalCollected)}</div></div>
     <div class="card" style="grid-column:span 4;background:${netPosition > 0.5 ? 'var(--amber-light)' : (netPosition < -0.5 ? 'var(--green-light)' : 'var(--panel)')};">
       <div class="label" style="color:${netPosition > 0.5 ? 'var(--amber)' : (netPosition < -0.5 ? 'var(--green)' : 'var(--ink-soft)')};">
@@ -1104,13 +1244,12 @@ document.getElementById('calcBtn').addEventListener('click', () => {
   document.getElementById('resultsBody').innerHTML = rows.map((r,idx) => {
     const badgeClass = r.trueUp > 0.005 ? 'owe' : (r.trueUp < -0.005 ? 'credit' : 'zero');
     const badgeText = r.trueUp > 0.005 ? `${fmtMoney(r.trueUp)} due` : (r.trueUp < -0.005 ? `${fmtMoney(Math.abs(r.trueUp))} credit` : 'settled');
-    const occBadge = r.occFraction < 0.995 ? `<span class="badge owe" style="background:var(--teal-light);color:var(--teal);">${(r.occFraction*100).toFixed(1)}%</span>` : `${(r.occFraction*100).toFixed(0)}%`;
     return `
       <tr>
         <td>${r.name || 'Tenant '+r.id}</td>
         <td class="num-cell">${fmt(r.area)} sq ft</td>
         <td class="num-cell">${fmtPct(r.share*100)}</td>
-        <td class="num-cell">${occBadge}</td>
+        <td class="num-cell" title="${fmtPct(r.occFrac*100)} of the period">${fmt(r.occ.days)} / ${fmt(r.occ.periodDays)}</td>
         <td class="num-cell">${r.rate}%</td>
         <td class="num-cell">${fmtMoney(r.camDue)}</td>
         <td class="num-cell">${fmtMoney(r.estPaid||0)}</td>
@@ -1126,20 +1265,21 @@ document.getElementById('calcBtn').addEventListener('click', () => {
     });
   });
 
-  goToStep(4);
+  goToStep(5);
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
   if(!lastResults) return;
-  const lines = [['Tenant','Leased area (sq ft)','Pro-rata share (%)','Occupancy (%)','Admin fee %','CAM due ($)','Estimated paid ($)','True-up ($, positive = due from tenant)']];
+  const lines = [['Tenant','Leased area (sq ft)','Pro-rata share (%)','Days charged','Share of period (%)','Admin fee %','CAM due ($)','Estimated paid ($)','True-up ($, positive = due from tenant)']];
   lastResults.rows.forEach(r => {
-    lines.push([r.name || 'Tenant '+r.id, r.area, (r.share*100).toFixed(2), (r.occFraction*100).toFixed(1), r.rate, r.camDue.toFixed(2), (r.estPaid||0).toFixed(2), r.trueUp.toFixed(2)]);
+    lines.push([r.name || 'Tenant '+r.id, r.area, (r.share*100).toFixed(2), `${r.occ.days} of ${r.occ.periodDays}`, (r.occFrac*100).toFixed(2), r.rate, r.camDue.toFixed(2), (r.estPaid||0).toFixed(2), r.trueUp.toFixed(2)]);
   });
   lines.push([]);
   lines.push(['Total operating expenses', lastResults.totalOpex.toFixed(2)]);
   lines.push(['Admin fee base (excl. tax/insurance)', lastResults.adminFeeBase.toFixed(2)]);
   lines.push(['Total admin fee (blended across tenants)', lastResults.totalAdminFee.toFixed(2)]);
-  lines.push(['Total CAM pool', lastResults.totalCAMPool.toFixed(2)]);
+  lines.push(['Total CAM billed to tenants', lastResults.totalBilled.toFixed(2)]);
+  lines.push(['Operating expenses not billed (outside tenant periods)', lastResults.unrecoveredOpex.toFixed(2)]);
   lines.push(['Total plaza area (sq ft)', lastResults.totalArea]);
 
   const csv = lines.map(row => row.map(cell => {
@@ -1154,58 +1294,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.download = 'cam_reconciliation_results.csv';
   a.click();
   URL.revokeObjectURL(url);
-});
-
-document.getElementById('exportExcelBtn').addEventListener('click', () => {
-  if(!lastResults) return;
-
-  const wb = XLSX.utils.book_new();
-
-  const summaryData = [
-    ['CAM Reconciliation Summary'],
-    ['Generated', new Date().toLocaleString()],
-    [],
-    ['Total operating expenses', lastResults.totalOpex],
-    ['Admin fee base (excl. tax/insurance)', lastResults.adminFeeBase],
-    ['Total admin fee (blended across tenants)', lastResults.totalAdminFee],
-    ['Total CAM pool (opex + fee)', lastResults.totalCAMPool],
-    ['Estimated CAM collected', lastResults.totalCollected],
-    [lastResults.netPosition > 0 ? 'Shortfall (invoice tenants)' : 'Surplus (credit tenants)', Math.abs(lastResults.netPosition)],
-    ['Total plaza area (sq ft)', lastResults.totalArea],
-    ['Months covered', lastResults.monthsCovered],
-  ];
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  summarySheet['!cols'] = [{wch:38},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
-
-  const tenantHeader = ['Tenant','Unit ID','Leased area (sq ft)','Pro-rata share (%)','Occupancy (%)','Admin fee %','CAM rate ($/sqft/yr)','CAM due ($)','Estimated paid ($)','True-up ($)','Status'];
-  const tenantRows = lastResults.rows.map(r => [
-    r.name || 'Tenant '+r.id,
-    r.unitId || '',
-    r.area,
-    Number((r.share*100).toFixed(2)),
-    Number((r.occFraction*100).toFixed(1)),
-    r.rate,
-    r.camRate !== null && r.camRate !== undefined ? r.camRate : '',
-    Number(r.camDue.toFixed(2)),
-    Number((r.estPaid||0).toFixed(2)),
-    Number(r.trueUp.toFixed(2)),
-    r.trueUp > 0.005 ? 'Due from tenant' : (r.trueUp < -0.005 ? 'Credit to tenant' : 'Settled'),
-  ]);
-  const tenantSheet = XLSX.utils.aoa_to_sheet([tenantHeader, ...tenantRows]);
-  tenantSheet['!cols'] = [{wch:22},{wch:10},{wch:14},{wch:12},{wch:11},{wch:10},{wch:14},{wch:13},{wch:14},{wch:12},{wch:16}];
-  XLSX.utils.book_append_sheet(wb, tenantSheet, 'Tenant Results');
-
-  if(lastResults.expensesSnapshot && lastResults.expensesSnapshot.length){
-    const expHeader = ['Category','Group','Annual amount ($)','Excluded from admin fee'];
-    const expRows = lastResults.expensesSnapshot.map(e => [e.category, e.group||'', e.amount, e.excluded ? 'Yes' : 'No']);
-    const expSheet = XLSX.utils.aoa_to_sheet([expHeader, ...expRows]);
-    expSheet['!cols'] = [{wch:32},{wch:24},{wch:16},{wch:20}];
-    XLSX.utils.book_append_sheet(wb, expSheet, 'Expense Breakdown');
-  }
-
-  const dateStr = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `cam_reconciliation_${dateStr}.xlsx`);
 });
 
 function groupExpenses(expensesSnap, adminRate){
@@ -1246,8 +1334,9 @@ function generateInvoicePDF(row, idx){
 
   const landlordName = document.getElementById('landlordName').value || '2740 LG Road';
   const landlordAddr = document.getElementById('landlordAddr').value || '';
-  const periodStart = fmtDateSlash(document.getElementById('periodStart').value);
-  const periodEnd = fmtDateSlash(document.getElementById('periodEnd').value);
+  // Tenant's own reconciliation period (falls back to the overall period)
+  const periodStart = row.occ && row.occ.start !== null ? fmtDateSlash(toISO(row.occ.start)) : fmtDateSlash(document.getElementById('periodStart').value);
+  const periodEnd = row.occ && row.occ.end !== null ? fmtDateSlash(toISO(row.occ.end)) : fmtDateSlash(document.getElementById('periodEnd').value);
   const invoiceDate = fmtDateSlash(document.getElementById('invoiceDate').value);
   const dueDate = fmtDateSlash(document.getElementById('invoiceDueDate').value);
   const startNum = parseInt(document.getElementById('invoiceStartNum').value) || 5000;
@@ -1279,8 +1368,7 @@ function generateInvoicePDF(row, idx){
   const totalAdjPool = groups.reduce((s,g)=>s+g.totalAdjExpense,0);
   const netExpenseTotal = totalAdjPool;
   const grossShare = netExpenseTotal * row.share;
-  const occFraction = (row.occFraction !== undefined && row.occFraction !== null) ? row.occFraction : 1;
-  const tenantNetShare = grossShare * occFraction;
+  const tenantNetShare = grossShare * row.occFrac;
 
   let y = 36;
   doc.setFontSize(10);
@@ -1304,8 +1392,8 @@ function generateInvoicePDF(row, idx){
     ['REFERENCE #', `Invoice for period ${periodStart} - ${periodEnd}`],
     ['DATE', invoiceDate],
     ['DUE DATE', dueDate],
-    ['TOTAL AMOUNT', fmtMoney(Math.abs(row.trueUp))],
-    ['TOTAL DUE', fmtMoney(Math.abs(row.trueUp))],
+    ['TOTAL AMOUNT', fmtSigned(row.trueUp)],
+    ['TOTAL DUE', fmtSigned(row.trueUp)],
   ];
   let my = y+16;
   metaLines.forEach(([label,val]) => {
@@ -1346,7 +1434,7 @@ function generateInvoicePDF(row, idx){
     `Property Area: ${fmt(totalArea)}`,
     `Unit Area: ${fmt(row.area)}`,
     `Prorata Share of Property: ${(row.share*100).toFixed(6)}%`,
-    `Average Occupancy: ${(occFraction*100).toFixed(1)}%`,
+    `Average Occupancy: ${fmtPct(row.occFrac*100)}`,
   ];
   let ly = y;
   leftInfo.forEach(line => { doc.text(line, 36, ly, {maxWidth:250}); ly += 11; });
@@ -1378,7 +1466,7 @@ function generateInvoicePDF(row, idx){
     ['Tenant Share Factor', (row.share*100).toFixed(6)+'%'],
     ['Gross Share', fmtMoney(grossShare)],
     ['Adjusted share', fmtMoney(grossShare)],
-    ['Tenant Occ Adj', (occFraction*100).toFixed(1)+'%'],
+    ['Tenant Occ Adj', fmtPct(row.occFrac*100)],
     ['Tenant Net Share', fmtMoney(tenantNetShare)],
     ['Admin fee on Net Share', fmtMoney(0)],
     ['Final Net Share', fmtMoney(tenantNetShare)],
@@ -1398,7 +1486,7 @@ function generateInvoicePDF(row, idx){
   doc.setFontSize(10);
   const dueLabel = row.trueUp >= 0 ? 'Total Recovery Billing (Due)' : 'Total Recovery Billing (Credit)';
   doc.text(dueLabel, sumX, y+8);
-  doc.text(fmtMoney(Math.abs(row.trueUp)), pageW-36, y+8, {align:'right'});
+  doc.text(fmtSigned(row.trueUp), pageW-36, y+8, {align:'right'});
 
   doc.setFontSize(7.5);
   doc.setFont(undefined,'normal');
@@ -1414,7 +1502,7 @@ function generateInvoicePDF(row, idx){
   y2 += 44;
   doc.setFontSize(12);
   doc.setFont(undefined,'bold');
-  doc.text('TOTAL DUE: '+fmtMoney(Math.abs(row.trueUp)), 36, y2);
+  doc.text('TOTAL DUE: '+fmtSigned(row.trueUp), 36, y2);
   y2 += 20;
   doc.setFontSize(9);
   doc.setFont(undefined,'normal');
@@ -1436,9 +1524,10 @@ function generateInvoicePDF(row, idx){
   doc.text(`DATE: ${invoiceDate}    TERMS:    DUE DATE: ${dueDate}    PAGE 2`, 36, 570);
 
   const safeTenant = tenantName.replace(/[^a-z0-9]+/gi,'_');
-  doc.save(`${safeTenant}_CAM_Recovery_Invoice_${fmtMoney(Math.abs(row.trueUp)).replace(/[^0-9.]/g,'')}.pdf`);
+  doc.save(`${safeTenant}_CAM_Recovery_Invoice_${fmtSigned(row.trueUp).replace(/[^0-9.\-]/g,'')}.pdf`);
 }
 
+syncPeriodEnd();
 renderExpenseTable();
 renderTenantTable();
 renderAreaStrip();
